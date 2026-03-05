@@ -507,13 +507,48 @@ async function init() {
     bmLink.href = bookmarklet;
     bmLink.textContent = "📌 BetLens Sync";
   }
+  // Show bookmarklet code in a copyable box
+  const bmCode = bookmarklet;
   document.getElementById("bmInstructions").innerHTML =
-    `<strong>How to set up sync:</strong><br><br>
-    1. Open this page in your phone browser (Chrome/Safari)<br>
-    2. Long-press the button below and tap <em>"Add to bookmarks"</em><br>
-    3. When you want to sync, open SportyBet, tap the bookmark<br>
-    4. Your bets will import automatically ✅<br><br>
-    <small>Your data stays on your phone. Nothing is uploaded to any server.</small>`;
+    `<strong>How to set up (Android Chrome):</strong><br><br>
+    1. Tap <strong>"Copy code"</strong> below<br>
+    2. Go to <strong>google.com</strong> in Chrome<br>
+    3. Tap ⋮ → <strong>Add to bookmarks</strong> → Save<br>
+    4. Tap ⋮ → <strong>Bookmarks</strong> → find it → tap ✏️ Edit<br>
+    5. <strong>Delete the URL</strong> and paste the copied code<br>
+    6. Save — done ✅<br><br>
+    <strong>How to use:</strong> Open SportyBet, log in, tap the bookmark. Your bets sync automatically.<br><br>
+    <small>Your data stays on your phone. Nothing is sent to any server.</small>`;
+
+  // Add copy button and code box
+  const bmWrap = document.getElementById("bmBtnWrap");
+  if (bmWrap) {
+    bmWrap.innerHTML = `
+      <button class="bm-btn" id="copyBmBtn" style="width:100%">📋 Copy bookmarklet code</button>
+      <p class="bm-note" id="copyNote">Paste this into a bookmark's URL field</p>
+      <textarea id="bmCodeBox" readonly style="
+        width:100%;margin-top:12px;padding:10px;border-radius:10px;
+        background:var(--surface2);border:1px solid var(--border);
+        color:var(--muted);font-family:'JetBrains Mono',monospace;
+        font-size:10px;resize:none;height:60px;line-height:1.4;
+      ">${bmCode}</textarea>`;
+
+    document.getElementById("copyBmBtn").addEventListener("click", () => {
+      const box = document.getElementById("bmCodeBox");
+      box.select();
+      // Modern clipboard API
+      navigator.clipboard.writeText(bmCode).then(() => {
+        document.getElementById("copyBmBtn").textContent = "✅ Copied!";
+        setTimeout(() => {
+          document.getElementById("copyBmBtn").textContent = "📋 Copy bookmarklet code";
+        }, 2500);
+      }).catch(() => {
+        // Fallback for older browsers
+        document.execCommand("copy");
+        document.getElementById("copyNote").textContent = "Code selected — tap Copy";
+      });
+    });
+  }
 
   // Check for sync hash first
   const synced = await processSyncHash();
