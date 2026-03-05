@@ -499,56 +499,53 @@ async function init() {
     showToast("Data cleared");
   });
 
-  // Bookmarklet setup page
+  // Bookmarklet setup — build once, inject into Setup tab
   const pwaUrl = window.location.origin;
-  const bookmarklet = buildBookmarklet(pwaUrl);
-  const bmLink = document.getElementById("bookmarkletLink");
-  if (bmLink) {
-    bmLink.href = bookmarklet;
-    bmLink.textContent = "📌 BetLens Sync";
-  }
-  // Show bookmarklet code in a copyable box
-  const bmCode = bookmarklet;
-  document.getElementById("bmInstructions").innerHTML =
-    `<strong>How to set up (Android Chrome):</strong><br><br>
-    1. Tap <strong>"Copy code"</strong> below<br>
-    2. Go to <strong>google.com</strong> in Chrome<br>
-    3. Tap ⋮ → <strong>Add to bookmarks</strong> → Save<br>
-    4. Tap ⋮ → <strong>Bookmarks</strong> → find it → tap ✏️ Edit<br>
-    5. <strong>Delete the URL</strong> and paste the copied code<br>
-    6. Save — done ✅<br><br>
-    <strong>How to use:</strong> Open SportyBet, log in, tap the bookmark. Your bets sync automatically.<br><br>
-    <small>Your data stays on your phone. Nothing is sent to any server.</small>`;
+  const bmCode = buildBookmarklet(pwaUrl);
 
-  // Add copy button and code box
-  const bmWrap = document.getElementById("bmBtnWrap");
-  if (bmWrap) {
+  function setupBookmarkletUI() {
+    const bmInstr = document.getElementById("bmInstructions");
+    const bmWrap  = document.getElementById("bmBtnWrap");
+    if (!bmInstr || !bmWrap) return;
+
+    bmInstr.innerHTML =
+      `<strong>How to set up (Android Chrome):</strong><br><br>
+      1. Tap <strong>"Copy code"</strong> below<br>
+      2. Go to <strong>google.com</strong> in Chrome<br>
+      3. Tap ⋮ → <strong>Add to bookmarks</strong> → Save<br>
+      4. Tap ⋮ → <strong>Bookmarks</strong> → find it → tap ✏️ Edit<br>
+      5. <strong>Delete the URL</strong> and paste the copied code<br>
+      6. Save — done ✅<br><br>
+      <strong>To sync:</strong> Open SportyBet, log in, tap the bookmark.<br><br>
+      <small>Your data stays on your phone. Nothing is sent to any server.</small>`;
+
     bmWrap.innerHTML = `
-      <button class="bm-btn" id="copyBmBtn" style="width:100%">📋 Copy bookmarklet code</button>
-      <p class="bm-note" id="copyNote">Paste this into a bookmark's URL field</p>
+      <button class="bm-btn" id="copyBmBtn" style="width:100%;margin-bottom:10px">📋 Copy bookmarklet code</button>
       <textarea id="bmCodeBox" readonly style="
-        width:100%;margin-top:12px;padding:10px;border-radius:10px;
+        width:100%;padding:10px;border-radius:10px;
         background:var(--surface2);border:1px solid var(--border);
         color:var(--muted);font-family:'JetBrains Mono',monospace;
-        font-size:10px;resize:none;height:60px;line-height:1.4;
-      ">${bmCode}</textarea>`;
+        font-size:9px;resize:none;height:56px;line-height:1.5;display:block;
+      ">${bmCode}</textarea>
+      <p class="bm-note" id="copyNote" style="margin-top:8px">Long-press the text above to select & copy if button doesn't work</p>`;
 
     document.getElementById("copyBmBtn").addEventListener("click", () => {
-      const box = document.getElementById("bmCodeBox");
-      box.select();
-      // Modern clipboard API
       navigator.clipboard.writeText(bmCode).then(() => {
         document.getElementById("copyBmBtn").textContent = "✅ Copied!";
+        document.getElementById("copyNote").textContent = "Now follow the steps above to save as a bookmark";
         setTimeout(() => {
           document.getElementById("copyBmBtn").textContent = "📋 Copy bookmarklet code";
-        }, 2500);
+        }, 3000);
       }).catch(() => {
-        // Fallback for older browsers
-        document.execCommand("copy");
-        document.getElementById("copyNote").textContent = "Code selected — tap Copy";
+        const box = document.getElementById("bmCodeBox");
+        box.focus(); box.select();
+        document.getElementById("copyNote").textContent = "Text selected — now tap Copy";
       });
     });
   }
+
+  // Run immediately (Setup tab may already be visible)
+  setupBookmarkletUI();
 
   // Check for sync hash first
   const synced = await processSyncHash();
