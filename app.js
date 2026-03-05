@@ -385,9 +385,9 @@ function ms(ws){return ws===20?"win":ws===30?"loss":(ws===40||ws===50)?"void":"p
 function po(o){
   var s=parseFloat(o.totalStake)||0,r=parseFloat(o.totalWinnings)||0;
   var legs=(o.selections||[]).map(function(x){return(x.home||"?")+" v "+(x.away||"?");});
-  var name=legs.length===0?"Unknown":legs.length===1?legs[0]:legs[0]+" +"+(legs.length-1);
+  var nm=legs.length===0?"Unknown":legs.length===1?legs[0]:legs[0]+" +"+(legs.length-1);
   var odds=(o.selections||[]).reduce(function(a,x){var v=parseFloat(x.odds);return isNaN(v)?a:a*v;},1);
-  return{orderId:o.shortId||o.orderId||"",name:name,odds:odds.toFixed(2),stake:s,ret:r,
+  return{orderId:o.shortId||o.orderId||"",name:nm,odds:odds.toFixed(2),stake:s,ret:r,
     status:ms(o.winningStatus),date:o.createTime?new Date(o.createTime).toISOString():null,
     isAcca:(o.selectionSize||1)>1,selectionSize:o.selectionSize||1};
 }
